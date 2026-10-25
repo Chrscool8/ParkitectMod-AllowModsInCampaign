@@ -1,13 +1,11 @@
-Use your mods and asset packs in the places the game turns them off: campaign levels, build challenges, and the custom campaign editor. Have fun!
+Use your mods and asset packs in the places the game turns them off: campaign levels, build challenges, and the custom campaign editor.
 
 [h1]Description:[/h1]
-Rules are made to be broken.
-
-Normally the game switches every mod off in build challenges and custom campaigns, and asset packs won't load in the built-in campaign levels. This turns all of that back on. Modded stuff also skips scenario research, so you don't have to research your own custom deco before you can place it.
+Normally the game switches every mod off in build challenges and custom campaigns, and asset packs won't load in the built-in campaign levels. This turns all of that back on. Modded stuff also skips scenario research.
 
 [h1]How to Use:[/h1]
-- Just turn it on. Next time you load one of those parks, your mods are there.
-- Each part has its own checkbox in the mod settings if you only want some of it:
+- Turn it on and load one of those parks.
+- Each part has its own checkbox in the mod settings:
   - Allow mods in Build Challenges
   - Allow mods in the custom campaign editor and map
   - Load asset packs in campaign levels
@@ -15,14 +13,11 @@ Normally the game switches every mod off in build challenges and custom campaign
 - The first three apply the next time a park loads.
 
 [h1]Features:[/h1]
-- Mods load in build challenges, the custom campaign editor, and the custom campaign map.
-- Asset packs load in the built-in campaign levels.
-- Modded objects are unlocked from the start in scenarios with research, and stay out of the research list. Only modded stuff, the game's own research is untouched.
+- Modded objects start unlocked in scenarios with research and stay out of the research list. The game's own stuff still needs researching.
 - Campaign progress and achievements still work like normal.
 
 [h1]Compatibility:[/h1]
 - Multiplayer: works, and not everyone needs it.
-- Switching the mod off turns everything back to how the game normally does it.
 
 [h1]Updates:[/h1]
 26/10/24
