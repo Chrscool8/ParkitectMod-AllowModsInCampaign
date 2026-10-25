@@ -1,4 +1,4 @@
-# Allow Mods In Campaign
+# Allow Mods In Campaign (And Everywhere) - Parkitect Mod
 
 <img src="preview.png" alt="Allow Mods In Campaign" width="400">
 
