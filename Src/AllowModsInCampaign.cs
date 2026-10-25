@@ -18,7 +18,7 @@ namespace AllowModsInCampaign
     /// <item>scenarios, where modded objects start locked behind research.</item>
     /// </list>
     /// </summary>
-    public class AMIC : AbstractMod
+    public class AMIC : AbstractMod, IModSettings
     {
         public const string VERSION_NUMBER = "261024";
         public const string IDENTIFIER = "AllowModsInCampaign";
@@ -65,10 +65,70 @@ namespace AllowModsInCampaign
 
         public override void onDisabled() { }
 
+        public void onDrawSettingsUI()
+        {
+            foreach (AMICSettings.Toggle toggle in AMICSettings.All)
+                toggle.Value = GUILayout.Toggle(toggle.Value, " " + toggle.Label);
+
+            GUILayout.Space(8f);
+            GUILayout.Label("The first three apply the next time a park loads.");
+        }
+
+        public void onSettingsOpened() { }
+
+        public void onSettingsClosed()
+        {
+            PlayerPrefs.Save();
+        }
+
         public static void Log(string message)
         {
             Debug.LogWarning(LOG_PREFIX + message);
         }
+    }
+
+    /// <summary>Per-player switches for each override, all on by default, kept in PlayerPrefs.</summary>
+    public static class AMICSettings
+    {
+        public sealed class Toggle
+        {
+            private readonly string key;
+            private bool? value;
+
+            public string Label { get; }
+
+            public Toggle(string key, string label)
+            {
+                this.key = key;
+                Label = label;
+            }
+
+            // Cached, since some of these are checked very often (research checks run for every buildable object).
+            public bool Value
+            {
+                get
+                {
+                    if (value == null)
+                        value = PlayerPrefs.GetInt(key, 1) == 1;
+                    return value.Value;
+                }
+                set
+                {
+                    if (this.value == value)
+                        return;
+
+                    this.value = value;
+                    PlayerPrefs.SetInt(key, value ? 1 : 0);
+                }
+            }
+        }
+
+        public static readonly Toggle BuildChallenges = new Toggle("AMIC_BuildChallenges", "Allow mods in Build Challenges");
+        public static readonly Toggle CustomCampaigns = new Toggle("AMIC_CustomCampaigns", "Allow mods in the custom campaign editor and map");
+        public static readonly Toggle CampaignAssetPacks = new Toggle("AMIC_CampaignAssetPacks", "Load asset packs in campaign levels");
+        public static readonly Toggle SkipModdedResearch = new Toggle("AMIC_SkipModdedResearch", "Modded objects skip scenario research");
+
+        public static readonly Toggle[] All = { BuildChallenges, CustomCampaigns, CampaignAssetPacks, SkipModdedResearch };
     }
 
     /// <summary>
@@ -81,9 +141,22 @@ namespace AllowModsInCampaign
     {
         private static readonly MethodInfo modsBlockedGetter = typeof(GameController).GetProperty(nameof(GameController.modsBlocked)).GetGetMethod();
 
+        // Blocked parks are re-blocked per setting, by why the game blocked them. Any other reason a future update adds
+        // is allowed.
         public static bool AreModsBlocked(GameController gameController)
         {
-            return gameController.modsBlocked && !AMIC.IsActive;
+            if (!gameController.modsBlocked)
+                return false;
+
+            if (!AMIC.IsActive)
+                return true;
+
+            if ((gameController.isInCustomCampaignEditor || gameController.isInCustomCampaignMap) && !AMICSettings.CustomCampaigns.Value)
+                return true;
+
+            Park park = gameController.park;
+            bool isBuildChallenge = park != null && park.scenario != null && park.scenario.GetType().Name == "BuildChallengeScenario";
+            return isBuildChallenge && !AMICSettings.BuildChallenges.Value;
         }
 
         private static IEnumerable<MethodBase> TargetMethods()
@@ -154,7 +227,7 @@ namespace AllowModsInCampaign
         {
             private static void Postfix(ref bool __result)
             {
-                if (__result && loadingAssetPack && AMIC.IsActive)
+                if (__result && loadingAssetPack && AMIC.IsActive && AMICSettings.CampaignAssetPacks.Value)
                     __result = false;
             }
         }
@@ -178,7 +251,7 @@ namespace AllowModsInCampaign
         {
             private static void Postfix(string referenceName, ref bool __result)
             {
-                if (!__result && AMIC.IsActive && IsModded(referenceName))
+                if (!__result && AMIC.IsActive && AMICSettings.SkipModdedResearch.Value && IsModded(referenceName))
                     __result = true;
             }
         }
@@ -188,7 +261,7 @@ namespace AllowModsInCampaign
         {
             private static void Postfix(string referenceName, ref bool __result)
             {
-                if (__result && AMIC.IsActive && IsModded(referenceName))
+                if (__result && AMIC.IsActive && AMICSettings.SkipModdedResearch.Value && IsModded(referenceName))
                     __result = false;
             }
         }
